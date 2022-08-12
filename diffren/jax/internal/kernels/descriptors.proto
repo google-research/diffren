@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package diffren.cuda;
+
+message RasterizeTrianglesConfig {
+  int32 triangle_count = 2;
+  int32 image_width = 3;
+  int32 image_height = 4;
+  int32 num_layers = 5;
+  int32 face_culling_mode = 6;
+}
