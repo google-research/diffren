@@ -1,5 +1,3 @@
-# TODO(fcole): describe this package.
-
 load(
     "@local_config_cuda//cuda:build_defs.bzl",
     "cuda_library",
@@ -66,6 +64,8 @@ cc_test(
         "//diffren/common/test_data:images",
     ],
     linkopts = [
+        # TODO(fcole): figure out why this linker option is necessary, or figure
+        # out how to use CUDA_HOME to find cuda.
         "-L/usr/local/cuda/lib64",
         "-lcudart",
         "-lm",
