@@ -14,7 +14,17 @@ classifiers = [
 keywords = []
 
 # pip dependencies of the project
-dependencies = []
+dependencies = [
+    "absl-py",
+    "chex",
+    "jax",
+    "flax",
+    "numpy",
+    "Pillow",
+    "scikit-image",
+    "transformations",
+    "etils"
+]
 
 # This is set automatically by flit using `diffren.__version__`
 dynamic = ["version"]
