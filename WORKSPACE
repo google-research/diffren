@@ -22,10 +22,10 @@ pip_install(
 # Import Tensorflow. This version should track the version imported by JAX.
 http_archive(
     name = "org_tensorflow",
-    sha256 = "6b2b714e00db7b82fd79aaa1deacd321c7f0aeab8b17cf8c32062a80070842a8",
-    strip_prefix = "tensorflow-579c67bd60220fe66a29318191f0850ff0aa825f",
+    sha256 = "9073ab3cbf3a89baee459f6e953cee240864393774f568fdba200a6ff5512c9f",
+    strip_prefix = "tensorflow-a4905aa04186bcaf89b06032baa450cc1ce103ad",
     urls = [
-        "https://github.com/tensorflow/tensorflow/archive/579c67bd60220fe66a29318191f0850ff0aa825f.tar.gz",
+        "https://github.com/tensorflow/tensorflow/archive/a4905aa04186bcaf89b06032baa450cc1ce103ad.tar.gz",
     ],
 )
 

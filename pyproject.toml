@@ -23,7 +23,8 @@ dependencies = [
     "Pillow",
     "scikit-image",
     "transformations",
-    "etils"
+    "etils",
+    "protobuf=3.20.*"  # Necessary to avoid "TypeError: Descriptors cannot not be created directly"
 ]
 
 # This is set automatically by flit using `diffren.__version__`

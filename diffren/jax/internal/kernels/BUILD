@@ -1,4 +1,3 @@
-load("//tools/build_defs/proto/cpp:cc_proto_library.bzl", "cc_proto_library")
 load(
     "@org_tensorflow//tensorflow:tensorflow.bzl",
     "pybind_extension",
