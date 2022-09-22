@@ -16,6 +16,7 @@
 #define DIFFREN_COMMON_KERNELS_RASTERIZE_UTILS_H_
 
 #include <algorithm>
+#include <cmath>
 
 #include "diffren/common/kernels/rasterize_triangles_types.h"
 
