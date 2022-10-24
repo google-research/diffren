@@ -36,7 +36,8 @@ def render_triangles(vertices: jnp.ndarray,
                      num_layers: int = 1,
                      face_culling_mode=constants.FaceCullingMode.BACK,
                      compositing_mode=constants.CompositingMode.SPLAT_OVER,
-                     return_accum_buffers=False) -> jnp.ndarray:
+                     return_accum_buffers=False,
+                     compute_diff_barys=False) -> jnp.ndarray:
   """Rendering with differentiable occlusion using rasterize-then-splat.
 
   Rasterizes the input triangles to produce surface point samples, applies
@@ -88,6 +89,11 @@ def render_triangles(vertices: jnp.ndarray,
     return_accum_buffers: bool specifying whether to return intermediate
       splatting accumulation buffers along with the final output. Intended for
       debugging.
+    compute_diff_barys: bool specifying whether derivatives of barycentric
+      coordinates w.r.t. vertices should be computed. Not necessary for
+      rasterize-then-splat, so False by default. May be useful in cases
+      derivatives are needed but splatting is not desirable, however
+      differentiable barycentrices do *not* account for occlusion boundaries.
 
   Returns:
     a [image_height, image_width, component_count] array of colors, or a
@@ -111,7 +117,8 @@ def render_triangles(vertices: jnp.ndarray,
       image_width,
       image_height,
       num_layers=num_layers,
-      face_culling_mode=face_culling_mode)
+      face_culling_mode=face_culling_mode,
+      compute_diff_barys=compute_diff_barys)
 
   interpolated = interpolate.interpolate_vertex_attributes(
       attributes, rasterized,
