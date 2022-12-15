@@ -71,6 +71,27 @@ class MeshTest(chex.TestCase, parameterized.TestCase):
     np.testing.assert_array_almost_equal(
         expected_stretched_normals, batched_normals[1, ...], decimal=2)
 
+  def test_scatter_points(self):
+    path = test_utils.make_resource_path('sphere.obj')
+    vertices, triangles = obj_loader.load_and_flatten_obj(path)
+
+    # Create a dummy vertex color attribute.
+    vertex_rgb = (vertices - jnp.min(vertices, axis=0)) / jnp.ptp(
+        vertices, axis=0)
+
+    xyz, attr = mesh.scatter_points(
+        jnp.array(vertices), {'rgb': vertex_rgb}, jnp.array(triangles), 1000)
+    rgb = attr['rgb']
+
+    # Test that the points are reasonably spaced over the sphere.
+    sample_center = jnp.mean(xyz, axis=0)
+    sample_std = jnp.linalg.norm(xyz - sample_center, axis=1)
+    rgb_center = jnp.mean(rgb, axis=0)
+    np.testing.assert_almost_equal(
+        jnp.linalg.norm(sample_center), 0.0, decimal=1)
+    np.testing.assert_almost_equal(jnp.mean(sample_std), 1.0, decimal=1)
+    np.testing.assert_array_almost_equal(
+        rgb_center, jnp.array((0.5, 0.5, 0.5)), decimal=1)
 
 if __name__ == '__main__':
   absltest.main()
