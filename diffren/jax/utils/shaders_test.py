@@ -32,6 +32,32 @@ import numpy as np
 
 class ShadersTest(chex.TestCase, parameterized.TestCase):
 
+  def test_textured_square(self):
+    clip_coordinates = jnp.array([[-0.5, -0.5, 0.0, 1.0], [0.5, -0.5, 0.0, 1.0],
+                                  [0.5, 0.5, 0.0, 1.0], [-0.5, 0.5, 0.0, 1.0]],
+                                 dtype=jnp.float32)
+    # Scale clip coordinates to draw a square in a 4:3 output image
+    clip_coordinates = clip_coordinates.at[:, 0].multiply(0.75)
+    uv_coordinates = jnp.array([[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]],
+                               dtype=jnp.float32)
+
+    texture = jnp.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0],
+                         [0.0, 0.0, 1.0]]).reshape((2, 2, 3))
+
+    def shader(attrs):
+      return shaders.texture_map(attrs['uv'], texture)
+
+    rendered = render.render_triangles(clip_coordinates, {'uv': uv_coordinates},
+                                       ((0, 1, 2), (0, 2, 3)), None,
+                                       test_utils.IMAGE_WIDTH,
+                                       test_utils.IMAGE_HEIGHT, shader)
+    image = compare_images.get_pil_formatted_image(np.array(rendered))
+    target_image_name = 'Textured_Square.png'
+    baseline_image_path = test_utils.make_resource_path(target_image_name)
+    compare_images.expect_image_file_and_image_are_near(
+        self, baseline_image_path, image, target_image_name,
+        '%s does not match.' % target_image_name)
+
   @parameterized.named_parameters(
       ('ycb_toy_airplane', 'ycb_toy_airplane.obj', 1.0,
        'ycb_toy_airplane_texture.png', (0.2, 0.3, 0.5),

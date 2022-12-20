@@ -16,9 +16,9 @@
 
 import io
 
+from diffren.jax.utils import image
 from diffren.jax.utils import transforms
 from etils import epath
-import jax
 import jax.numpy as jnp
 import numpy as np
 from PIL import Image as PilImage
@@ -32,36 +32,11 @@ def load_texture(texture_filename):
       255.0)
 
 
-def resample_pt(data, warp):
-  """Some simple bilinear interpolation code."""
-  x, y = warp
-
-  x0 = jnp.floor(x).astype(jnp.int32)
-  y0 = jnp.floor(y).astype(jnp.int32)
-
-  x1 = x0 + 1
-  y1 = y0 + 1
-
-  x0_clip = jnp.clip(x0, 0, data.shape[1] - 1)
-  x1_clip = jnp.clip(x1, 0, data.shape[1] - 1)
-  y0_clip = jnp.clip(y0, 0, data.shape[0] - 1)
-  y1_clip = jnp.clip(y1, 0, data.shape[0] - 1)
-
-  c0 = (x1_clip - x) * (y1_clip - y)
-  c1 = (x1_clip - x) * (y - y0_clip)
-  c2 = (x - x0_clip) * (y1_clip - y)
-  c3 = (x - x0_clip) * (y - y0_clip)
-
-  i0 = data[y0, x0]
-  i1 = data[y1, x0]
-  i2 = data[y0, x1]
-  i3 = data[y1, x1]
-
-  return c0 * i0 + c1 * i1 + c2 * i2 + c3 * i3
-
-
 def texture_map(uv_image, texture_image_or_filename):
   """Applies a texture map to a UV image using bilinear interpolation.
+
+  Clamps samples outside the texture to the edge of the texture (analogous to
+  OpenGL CLAMP_TO_EDGE).
 
   Args:
     uv_image: a [height, width, 2] array of UV coordinates with range [0.0,
@@ -78,9 +53,8 @@ def texture_map(uv_image, texture_image_or_filename):
     texture_image = texture_image_or_filename
 
   texture = jnp.array(texture_image)
-  query_points = uv_image.reshape(-1, 2)
-  query_points = query_points * float(texture.shape[0])
-  interpolated = jax.vmap(lambda pt: resample_pt(texture, pt))(query_points)
+  query_points = uv_image * jnp.array(texture.shape[0:2])
+  interpolated = image.bilinear_resample(texture, query_points, pad_mode='edge')
   return interpolated.reshape(uv_image.shape[0], uv_image.shape[1], 3)
 
 
