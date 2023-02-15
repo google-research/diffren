@@ -46,7 +46,8 @@ def compute_vertex_normals(vertices, triangles):
       for i in range(3)
   ]
   vertex_normals = (
-      corners_scattered[0] + corners_scattered[1] + corners_scattered[2])
+      corners_scattered[0] + corners_scattered[1] + corners_scattered[2]
+  )
   normalized_normals = transforms.l2_normalize(vertex_normals, axis=1)
   return normalized_normals
 
@@ -83,7 +84,8 @@ def scatter_points(vertices, attributes, triangles, num_points, rng=None):
 
   # Sample num_points face indices proportionally to the face areas.
   random_faces = jax.random.choice(
-      rng, triangles.shape[0], shape=(num_points,), p=face_pdf)
+      rng, triangles.shape[0], shape=(num_points,), p=face_pdf
+  )
 
   # Pick two random barycentric coordinates in [0.0, 1.0).
   random_barys = jax.random.uniform(rng, (num_points, 2))
@@ -92,13 +94,18 @@ def scatter_points(vertices, attributes, triangles, num_points, rng=None):
   # the triangle. To put those samples back in the triangle, we flip both
   # barycentrics when their sum is > 1.0.
   random_barys = jnp.where(
-      jnp.sum(random_barys, axis=1, keepdims=True) > 1.0, 1.0 - random_barys,
-      random_barys)
+      jnp.sum(random_barys, axis=1, keepdims=True) > 1.0,
+      1.0 - random_barys,
+      random_barys,
+  )
 
   def construct_samples(a, e_ab, e_ac):
     """Interpolates samples using random_faces and random_barys."""
-    return (a[random_faces, :] + e_ab[random_faces, :] * random_barys[:, 0:1] +
-            e_ac[random_faces, :] * random_barys[:, 1:2])
+    return (
+        a[random_faces, :]
+        + e_ab[random_faces, :] * random_barys[:, 0:1]
+        + e_ac[random_faces, :] * random_barys[:, 1:2]
+    )
 
   xyz_samples = construct_samples(verts_a, edge_ab, edge_ac)
 
@@ -107,7 +114,27 @@ def scatter_points(vertices, attributes, triangles, num_points, rng=None):
     attr_a = attr[triangles[:, 0], :]
     attr_b = attr[triangles[:, 1], :]
     attr_c = attr[triangles[:, 2], :]
-    attr_samples[key] = construct_samples(attr_a, attr_b - attr_a,
-                                          attr_c - attr_a)
+    attr_samples[key] = construct_samples(
+        attr_a, attr_b - attr_a, attr_c - attr_a
+    )
 
   return xyz_samples, attr_samples
+
+
+def remove_unused_vertices(vertices, attributes, triangles):
+  """Removes vertices that are not referenced by any triangle."""
+  vertex_mask = (
+      jnp.zeros_like(vertices[:, 0], dtype=bool)
+      .at[triangles.flatten()]
+      .set(True)
+  )
+  kept_vertices = vertices[vertex_mask, :]
+  kept_attributes = jax.tree_map(lambda x: x[vertex_mask, :], attributes)
+
+  vertex_mask_offset = jnp.pad(vertex_mask, ((1, 0)), constant_values=False)
+  new_vert_indices = jnp.cumsum(vertex_mask_offset)
+  reindexed_triangles = new_vert_indices[triangles.flatten()].reshape(
+      triangles.shape
+  )
+
+  return kept_vertices, kept_attributes, reindexed_triangles

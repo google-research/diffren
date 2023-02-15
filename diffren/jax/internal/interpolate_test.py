@@ -40,8 +40,12 @@ class InterpolateTest(chex.TestCase, parameterized.TestCase):
         dtype=jnp.int32)
 
     perspective = test_utils.make_perspective_matrix()
-    projection_1 = jnp.matmul(perspective, test_utils.make_look_at_matrix(0))
-    projection_2 = jnp.matmul(perspective, test_utils.make_look_at_matrix(1))
+    projection_1 = jnp.matmul(
+        perspective, test_utils.make_look_at_matrix('view_1')
+    )
+    projection_2 = jnp.matmul(
+        perspective, test_utils.make_look_at_matrix('view_2')
+    )
     self.projection = jnp.stack([projection_1, projection_2], axis=0)
 
   @parameterized.parameters([1, 2, 3])

@@ -84,3 +84,35 @@ py_test(
         "@diffren_deps//pypi__numpy",
     ],
 )
+
+py_library(
+    name = "depthmap",
+    srcs = ["depthmap.py"],
+    deps = [
+        ":mesh",
+        "@diffren_deps//pypi__einops",
+        "@diffren_deps//pypi__jax",
+    ],
+)
+
+py_test(
+    name = "depthmap_test",
+    srcs = ["depthmap_test.py"],
+    data = [
+        "//third_party/py/diffren/common/test_data:images",
+        "//third_party/py/diffren/common/test_data:meshes",
+    ],
+    deps = [
+        ":depthmap",
+        ":shaders",
+        ":transforms",
+        "//diffren/common:compare_images",
+        "//diffren/common:test_utils",
+        "//diffren/jax:constants",
+        "//diffren/jax:render",
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
+    ],
+)

@@ -24,12 +24,17 @@ import numpy as np
 from PIL import Image as PilImage
 
 
-def load_texture(texture_filename):
+def load_texture(texture_filename, lower_left_origin=True):
   """Returns a texture image loaded from a file (float32 in [0,1] range)."""
   texture_bytes = epath.Path(texture_filename).read_bytes()
-  return np.flipud(
-      np.asarray(PilImage.open(io.BytesIO(texture_bytes))).astype(np.float32) /
-      255.0)
+  texture = (
+      np.asarray(PilImage.open(io.BytesIO(texture_bytes))).astype(np.float32)
+      / 255.0
+  )
+  if lower_left_origin:
+    # Flip the image to match the OpenGL origin lower-left convention.
+    texture = np.flipud(texture)
+  return texture
 
 
 def texture_map(uv_image, texture_image_or_filename):
@@ -53,16 +58,20 @@ def texture_map(uv_image, texture_image_or_filename):
     texture_image = texture_image_or_filename
 
   texture = jnp.array(texture_image)
-  query_points = uv_image * jnp.array(texture.shape[0:2])
+  query_points = uv_image * jnp.array((texture.shape[1], texture.shape[0]))
   interpolated = image.bilinear_resample(texture, query_points, pad_mode='edge')
-  return interpolated.reshape(uv_image.shape[0], uv_image.shape[1], 3)
+  return interpolated.reshape(
+      uv_image.shape[0], uv_image.shape[1], texture.shape[2]
+  )
 
 
-def diffuse_light(diffuse_image,
-                  normals_image,
-                  light_direction=(0.5, 0.5, 1.0),
-                  ka=0.5,
-                  kd=0.5):
+def diffuse_light(
+    diffuse_image,
+    normals_image,
+    light_direction=(0.5, 0.5, 1.0),
+    ka=0.5,
+    kd=0.5,
+):
   """Applies diffuse directional lighting with an ambient component.
 
   Args:
@@ -81,24 +90,27 @@ def diffuse_light(diffuse_image,
   light_direction = light_direction.reshape(1, 1, 3)
   light_direction = transforms.l2_normalize(light_direction, axis=-1)
   n_dot_l = jnp.clip(
-      jnp.sum(normals_image * light_direction, axis=2, keepdims=True), 0.0, 1.0)
+      jnp.sum(normals_image * light_direction, axis=2, keepdims=True), 0.0, 1.0
+  )
   ambient = diffuse_image * ka
   diffuse = diffuse_image * kd * n_dot_l
   return ambient + diffuse
 
 
-def point_light(diffuse_image,
-                normals_image,
-                pixel_positions,
-                point_locations,
-                eye_position=(0.0, 0.0, 0.0),
-                ka=0.3,
-                kd=1.4,
-                ks=0.0,
-                ns=0.0,
-                attenuation_constant=1.0,
-                attenuation_linear=0.7,
-                attenuation_quadratic=1.8):
+def point_light(
+    diffuse_image,
+    normals_image,
+    pixel_positions,
+    point_locations,
+    eye_position=(0.0, 0.0, 0.0),
+    ka=0.3,
+    kd=1.4,
+    ks=0.0,
+    ns=0.0,
+    attenuation_constant=1.0,
+    attenuation_linear=0.7,
+    attenuation_quadratic=1.8,
+):
   """Applies a point light source with ambient, diffuse, and specular lighting.
 
     The attenuation is based on the quadratic formulation in OpenGL tutorial
@@ -130,22 +142,30 @@ def point_light(diffuse_image,
   eye_position = jnp.array(eye_position)
 
   light_direction = transforms.l2_normalize(
-      point_locations - pixel_positions, axis=-1)
+      point_locations - pixel_positions, axis=-1
+  )
   view_direction = transforms.l2_normalize(
-      eye_position - pixel_positions, axis=-1)
+      eye_position - pixel_positions, axis=-1
+  )
   half_vector = transforms.l2_normalize(
-      light_direction + view_direction, axis=-1)
+      light_direction + view_direction, axis=-1
+  )
 
   nol = jnp.clip(
-      jnp.sum(normals_image * light_direction, axis=2, keepdims=True), 0.0, 1.0)
+      jnp.sum(normals_image * light_direction, axis=2, keepdims=True), 0.0, 1.0
+  )
   noh = jnp.clip(
-      jnp.sum(normals_image * half_vector, axis=2, keepdims=True), 0.0, 1.0)
+      jnp.sum(normals_image * half_vector, axis=2, keepdims=True), 0.0, 1.0
+  )
 
   distance = jnp.linalg.norm(
-      point_locations - pixel_positions, axis=-1, keepdims=True)
+      point_locations - pixel_positions, axis=-1, keepdims=True
+  )
   decay = 1.0 / (
-      attenuation_constant + attenuation_linear * distance +
-      attenuation_quadratic * distance * distance)
+      attenuation_constant
+      + attenuation_linear * distance
+      + attenuation_quadratic * distance * distance
+  )
 
   luma = ka + kd * nol + ks * noh**ns
   shading = diffuse_image * luma * decay
