@@ -172,7 +172,7 @@ def splat_at_pixel_centers(xyz_layers: jnp.ndarray, color_layers: jnp.ndarray,
   # Composite the foreground, surface, and background layers back-to-front.
   output_color = composite.over(normalized_color)
 
-  return output_color, accumulate_color, normalized_color
+  return output_color, accumulate_color, normalized_color  # pytype: disable=bad-return-type  # jax-ndarray
 
 
 def splat_shaded_pixels(vertices: jnp.ndarray, camera_matrices: jnp.ndarray,
@@ -224,6 +224,6 @@ def splat_shaded_pixels(vertices: jnp.ndarray, camera_matrices: jnp.ndarray,
       viewport_xyz, shaded_pixels, rasterized_fb.foreground_mask)
 
   if return_accum_buffers:
-    return output, accum, norm_accum
+    return output, accum, norm_accum  # pytype: disable=bad-return-type  # jax-ndarray
 
   return output

@@ -59,7 +59,7 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
                         [1.0, 0, 0, 1.0], [1.0, 0, 0, 1.0], [1.0, 0, 0, 1.0]],
                        dtype=jnp.float32)
 
-    composite, _, normalized_layers = render.render_triangles(
+    composite, _, normalized_layers = render.render_triangles(  # pytype: disable=wrong-arg-types  # jax-ndarray
         vertices, {'colors': colors},
         triangles,
         None,
@@ -116,7 +116,7 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
           vertices_slice: jnp.ndarray,
           attributes_slice: jnp.ndarray,
       ):
-        return render.render_triangles(
+        return render.render_triangles(  # pytype: disable=wrong-arg-types  # jax-ndarray
             vertices_slice, {'colors': attributes_slice},
             triangles,
             None,

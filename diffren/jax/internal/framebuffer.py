@@ -77,11 +77,11 @@ class Framebuffer(object):
 
   @property
   def is_batched(self):
-    return self.barycentrics.shape.ndim == 5
+    return self.barycentrics.shape.ndim == 5  # pytype: disable=attribute-error  # jax-ndarray
 
   @property
   def is_multi_layer(self):
-    return self.barycentrics.shape.ndim in [4, 5]
+    return self.barycentrics.shape.ndim in [4, 5]  # pytype: disable=attribute-error  # jax-ndarray
 
   @property
   def batch_size(self):
@@ -125,5 +125,5 @@ class Framebuffer(object):
         if self.triangle_id is not None else None,
         vertex_ids=self.vertex_ids[:, index, ...],
         foreground_mask=self.foreground_mask[:, index, ...],
-        attributes={k: v.layer(index) for k, v in self.attributes.items()},
-        barycentrics=self.barycentrics.layer(index))
+        attributes={k: v.layer(index) for k, v in self.attributes.items()},  # pytype: disable=attribute-error  # jax-ndarray
+        barycentrics=self.barycentrics.layer(index))  # pytype: disable=attribute-error  # jax-ndarray
