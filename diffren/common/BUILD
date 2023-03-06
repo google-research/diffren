@@ -8,6 +8,7 @@ py_library(
     srcs = ["test_utils.py"],
     deps = [
         ":compare_images",
+        ":obj_loader",
     ],
 )
 

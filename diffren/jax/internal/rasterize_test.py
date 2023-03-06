@@ -40,7 +40,9 @@ class RasterizeTest(chex.TestCase, parameterized.TestCase):
         dtype=jnp.int32)
 
     perspective = test_utils.make_perspective_matrix()
-    self.projection = jnp.matmul(perspective, test_utils.make_look_at_matrix(0))
+    self.projection = jnp.matmul(
+        perspective, test_utils.make_look_at_matrix('view_1')
+    )
 
   @chex.variants(with_jit=True, without_jit=True)
   @parameterized.named_parameters(

@@ -22,7 +22,6 @@ import chex
 from diffren.common import compare_images
 from diffren.common import obj_loader
 from diffren.common import test_utils
-from diffren.jax import camera
 from diffren.jax import constants
 from diffren.jax import render
 from diffren.jax.utils import mesh
@@ -182,7 +181,7 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
     extra_accumulation_epsilon parameter.
     """
     perspective = test_utils.make_perspective_matrix()
-    look_at = test_utils.make_look_at_matrix(0)
+    look_at = test_utils.make_look_at_matrix('view_1')
     projection = transforms.hi_prec_matmul(perspective, look_at)
 
     vertices, triangles = obj_loader.load_and_flatten_obj(
@@ -224,22 +223,28 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
         pixel_error_threshold=0.0)
 
   @parameterized.named_parameters(
-      ('ycb_toy_airplane', 'ycb_toy_airplane.obj', 1.0,
-       'ycb_toy_airplane_texture.png', (0.2, 0.3, 0.5),
-       (0.0, 1.0, 0.0), 'Toy_Airplane_Textured.png'),
-      ('spot', 'spot_triangulated.obj', 0.2, 'spot_texture.png',
-       (0.2, 0.3, -0.5), (0.0, -1.0, 0.0), 'Spot_Textured.png'))
-  def test_renders_textured_object(self, obj_name, obj_scale, png_name,
-                                   eye_position, eye_up, target_image_name):
+      (
+          'ycb_toy_airplane',
+          'ycb_toy_airplane.obj',
+          'ycb_toy_airplane_texture.png',
+          'Toy_Airplane_Textured.png',
+      ),
+      (
+          'spot',
+          'spot_triangulated.obj',
+          'spot_texture.png',
+          'Spot_Textured.png',
+      ),
+  )
+  def test_renders_textured_object(self, obj_name, png_name, target_image_name):
     """Renders objects with texture mapping."""
-    look_at_matrix = camera.look_at(eye_position, ((0.0, 0.0, 0.0),), eye_up)
+    look_at_matrix = test_utils.make_look_at_matrix(obj_name)
     perspective_matrix = test_utils.make_perspective_matrix()
     projection = transforms.hi_prec_matmul(perspective_matrix, look_at_matrix)
 
-    vertices, triangles = obj_loader.load_and_flatten_obj(
-        test_utils.make_resource_path(obj_name))
+    vertices, triangles = test_utils.load_test_obj(obj_name)
+    positions = vertices[:, :3]
 
-    positions = vertices[:, :3] * obj_scale
     uvs = vertices[:, 3:5]
     if vertices.shape[1] > 5:
       normals = vertices[:, 5:]

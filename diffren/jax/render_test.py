@@ -45,10 +45,12 @@ class RenderTest(chex.TestCase, parameterized.TestCase):
         dtype=jnp.int32)
 
     perspective = test_utils.make_perspective_matrix()
-    projection_1 = transforms.hi_prec_matmul(perspective,
-                                             test_utils.make_look_at_matrix(0))
-    projection_2 = transforms.hi_prec_matmul(perspective,
-                                             test_utils.make_look_at_matrix(1))
+    projection_1 = transforms.hi_prec_matmul(
+        perspective, test_utils.make_look_at_matrix('view_1')
+    )
+    projection_2 = transforms.hi_prec_matmul(
+        perspective, test_utils.make_look_at_matrix('view_2')
+    )
     self.projection = jnp.stack([projection_1, projection_2], axis=0)
 
   @parameterized.parameters(['no batching', 'batched vertices', 'all batched'])
@@ -104,7 +106,7 @@ class RenderTest(chex.TestCase, parameterized.TestCase):
     def shader(attributes):
       """Computes a normalized disparity value from the rasterized positions."""
       positions = attributes[WORLD_POSITION]
-      look_at = test_utils.make_look_at_matrix(0)
+      look_at = test_utils.make_look_at_matrix('view_1')
       flat_positions = jnp.reshape(positions, (-1, 3))
       camera_positions = transforms.transform_homogeneous(
           look_at, flat_positions)

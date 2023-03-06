@@ -24,6 +24,7 @@ dependencies = [
     "scikit-image",
     "transformations",
     "etils",
+    "einops",
     "protobuf<4"  # Necessary to avoid "TypeError: Descriptors cannot not be created directly"
 ]
 

@@ -18,6 +18,7 @@ import math
 import os
 
 from diffren.common import compare_images
+from diffren.common import obj_loader
 from etils import epath
 import numpy as np
 from PIL import Image as PilImage
@@ -30,17 +31,31 @@ TEST_DATA_DIRECTORY = 'common/test_data'
 
 def make_resource_path(resource_name):
   return os.path.join(
-      epath.resource_path('diffren'), TEST_DATA_DIRECTORY, resource_name)
+      epath.resource_path('diffren'), TEST_DATA_DIRECTORY, resource_name
+  )
 
 
-def make_look_at_matrix(index):
+def eye_position(view_name):
+  """Returns test eye position and up vectors by name."""
+  if view_name.startswith('view_1'):
+    eye = np.array((2.0, 3.0, 6.0))
+    world_up = np.array((0.0, 1.0, 0.0))
+  elif view_name.startswith('view_2'):
+    eye = np.array((-3.0, 1.0, 6.0))
+    world_up = np.array((0.0, 1.0, 0.0))
+  elif view_name.startswith('ycb_toy_airplane'):
+    eye = np.array((0.2, 0.3, 0.5))
+    world_up = np.array((0.0, 1.0, 0.0))
+  elif view_name.startswith('spot'):
+    eye = np.array((0.2, 0.3, -0.5))
+    world_up = np.array((0.0, -1.0, 0.0))
+  return eye, world_up
+
+
+def make_look_at_matrix(view_name):
   """Predefined lookat matrices that match test golden images."""
   center = np.array((0.0, 0.0, 0.0))
-  world_up = np.array((0.0, 1.0, 0.0))
-  if index == 0:
-    eye = np.array((2.0, 3.0, 6.0))
-  else:
-    eye = np.array((-3.0, 1.0, 6.0))
+  eye, world_up = eye_position(view_name)
 
   forward = center - eye
   forward_norm = np.linalg.norm(forward)
@@ -81,28 +96,56 @@ def make_perspective_matrix(index=0):
   # pyformat: enable
 
 
+def load_test_obj(obj_name):
+  """Loads and applies rescaling to test .obj files."""
+  vertices, triangles = obj_loader.load_and_flatten_obj(
+      make_resource_path(obj_name)
+  )
+
+  obj_scale = 0.2 if obj_name.startswith('spot') else 1.0
+  vertices[:, :3] *= obj_scale
+
+  return vertices, triangles
+
+
 def color_map_ids(ids_image, id_zero_is_white=False):
   """Maps an id image to a color cycle."""
-  color_cycle = np.array([[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 0, 255],
-                          [0, 255, 255], [255, 255, 0],
-                          [128, 0, 0], [0, 128, 0], [0, 0, 128], [128, 0, 128],
-                          [0, 128, 128], [128, 128, 0]]) / 255.0
+  color_cycle = (
+      np.array([
+          [255, 0, 0],
+          [0, 255, 0],
+          [0, 0, 255],
+          [255, 0, 255],
+          [0, 255, 255],
+          [255, 255, 0],
+          [128, 0, 0],
+          [0, 128, 0],
+          [0, 0, 128],
+          [128, 0, 128],
+          [0, 128, 128],
+          [128, 128, 0],
+      ])
+      / 255.0
+  )
 
   mod_ids = ids_image % color_cycle.shape[0]
   flat_mapped_ids = color_cycle[np.reshape(mod_ids, (-1,)), :]
   if id_zero_is_white:
     id_is_zero = np.reshape(ids_image, (-1,)) == 0
     flat_mapped_ids[id_is_zero, :] = np.array([1.0, 1.0, 1.0])
-  return np.reshape(flat_mapped_ids,
-                    (ids_image.shape[0], ids_image.shape[1], 3))
+  return np.reshape(
+      flat_mapped_ids, (ids_image.shape[0], ids_image.shape[1], 3)
+  )
 
 
-def check_image(test,
-                image_tensor,
-                target_image_name,
-                resize_image_to=None,
-                exact=False,
-                add_transparency=True):
+def check_image(
+    test,
+    image_tensor,
+    target_image_name,
+    resize_image_to=None,
+    exact=False,
+    add_transparency=True,
+):
   """Checks the input image against an image file and saves the result."""
   image = compare_images.get_pil_formatted_image(image_tensor, add_transparency)
   if resize_image_to:
@@ -117,4 +160,5 @@ def check_image(test,
       image,
       target_image_name,
       '%s does not match.' % target_image_name,
-      pixel_error_threshold=error_threshold)
+      pixel_error_threshold=error_threshold,
+  )
