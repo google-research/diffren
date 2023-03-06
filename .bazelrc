@@ -1,1 +1,1 @@
-import %workspace%/../jax/.bazelrc
+import .jax_bazelrc
