@@ -4,21 +4,9 @@ name: Unittests & Auto-publish
 on: [push, workflow_dispatch]
 
 jobs:
-  bazel-build-job:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-    - uses: Jimver/cuda-toolkit@v0.2.8
-      id: cuda-toolkit
-
-    # Steal JAX's .bazelrc and then build.
-    - run: wget https://raw.githubusercontent.com/google/jax/main/.bazelrc -O .jax_bazelrc
-    - run: bazel build ... --config=cuda
-
   pytest-job:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: bazel-build-job  # Needs the bazel build to succeed.
 
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}

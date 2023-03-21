@@ -39,7 +39,7 @@ def perspective(aspect_ratio: float, fov_y: float, near_clip: float,
   # The multiplication of fov_y by pi/360.0 simultaneously converts to radians
   # and adds the half-angle factor of .5.
   focal_length_y = 1.0 / jnp.tan(fov_y * (math.pi / 360.0))
-  return perspective_from_intrinsics(focal_length_y / aspect_ratio,
+  return perspective_from_intrinsics(focal_length_y / aspect_ratio,  # pytype: disable=wrong-arg-types  # jax-types
                                      focal_length_y, 0.0, 0.0, near_clip,
                                      far_clip, 2, 2)
 
