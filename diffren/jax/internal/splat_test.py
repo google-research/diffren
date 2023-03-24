@@ -260,7 +260,7 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
       lit_rgba = jnp.concatenate((lit, alpha), axis=-1)
       return lit_rgba
 
-    rendered = render.render_triangles(positions, attributes, triangles,
+    rendered = render.render_triangles(positions, attributes, triangles,  # pytype: disable=wrong-arg-types  # numpy-scalars
                                        projection, test_utils.IMAGE_WIDTH,
                                        test_utils.IMAGE_HEIGHT, shade)
 

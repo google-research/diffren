@@ -122,7 +122,7 @@ class RenderTest(chex.TestCase, parameterized.TestCase):
       disparity = jnp.reshape(disparity, positions.shape[:2])
       return jnp.stack([disparity, jnp.ones_like(disparity)], axis=-1)
 
-    rendered = render.render_triangles(
+    rendered = render.render_triangles(  # pytype: disable=wrong-arg-types  # numpy-scalars
         vertices, {WORLD_POSITION: vertices},
         triangles,
         self.projection[0, ...],
