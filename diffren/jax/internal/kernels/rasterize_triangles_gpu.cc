@@ -22,7 +22,7 @@
 #include "absl/status/status.h"
 #include "diffren/jax/internal/kernels/descriptors.pb.h"
 #include "include/pybind11/pybind11.h"
-#include "tensorflow/compiler/xla/service/custom_call_status.h"
+#include "xla/service/custom_call_status.h"
 
 namespace py = pybind11;
 
