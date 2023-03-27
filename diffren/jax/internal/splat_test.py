@@ -38,7 +38,7 @@ def load_and_blur_image(image_name, blur_sigma):
   image_path = test_utils.make_resource_path(image_name)
   image = np.array(PilImage.open(image_path)).astype(np.float32) / 255.0
   image = image[..., :3]
-  blurred_image = filters.gaussian(image, blur_sigma, multichannel=True)
+  blurred_image = filters.gaussian(image, blur_sigma, channel_axis=-1)
   return compare_images.get_pil_formatted_image(blurred_image)
 
 
