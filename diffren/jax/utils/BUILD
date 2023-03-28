@@ -40,6 +40,7 @@ py_library(
     name = "shaders",
     srcs = ["shaders.py"],
     deps = [
+        ":image",
         ":transforms",
         requirement("etils"),
         requirement("jax"),
@@ -117,6 +118,26 @@ py_test(
         requirement("absl_py"),
         requirement("chex"),
         requirement("etils"),
+        requirement("jax"),
+        requirement("numpy"),
+    ],
+)
+
+py_library(
+    name = "image",
+    srcs = ["image.py"],
+    deps = [
+        requirement("jax"),
+    ],
+)
+
+py_test(
+    name = "image_test",
+    srcs = ["image_test.py"],
+    deps = [
+        ":image",
+        requirement("absl_py"),
+        requirement("chex"),
         requirement("jax"),
         requirement("numpy"),
     ],
