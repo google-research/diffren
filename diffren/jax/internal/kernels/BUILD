@@ -1,8 +1,9 @@
 load(
-    "@org_tensorflow//tensorflow:tensorflow.bzl",
+    "@jax//jaxlib:jax.bzl",
     "pybind_extension",
 )
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
+load("@pip//:requirements.bzl", "requirement")
 
 licenses(["notice"])
 
@@ -39,9 +40,9 @@ pybind_extension(
         "//diffren/common/kernels:rasterize_triangles_impl_cuda",
         "@com_google_absl//absl/status",
         "@local_config_cuda//cuda:cuda_headers",
-        "@org_tensorflow//tensorflow/compiler/xla/service:custom_call_status",
-        "@org_tensorflow//tensorflow/compiler/xla/stream_executor/cuda:cudart_stub",
         "@pybind11",
+        "@xla//xla/service:custom_call_status",
+        "@xla//xla/stream_executor/cuda:cudart_stub",
     ],
 )
 
@@ -57,8 +58,8 @@ pybind_extension(
     deps = [
         "//diffren/common/kernels:rasterize_triangles_impl",
         "@com_google_absl//absl/types:span",
-        "@org_tensorflow//tensorflow/compiler/xla/service:custom_call_status",
         "@pybind11",
+        "@xla//xla/service:custom_call_status",
     ],
 )
 
@@ -71,9 +72,9 @@ py_test(
     deps = [
         ":rasterize_triangles_xla",
         "//diffren/common:test_utils",
-        "@diffren_deps//pypi__absl_py",
-        "@diffren_deps//pypi__chex",
-        "@diffren_deps//pypi__jax",
+        requirement("absl_py"),
+        requirement("chex"),
+        requirement("jax"),
     ],
 )
 
