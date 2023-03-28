@@ -7,24 +7,41 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.10.2.tar.gz",
 )
 
-load("@rules_python//python:repositories.bzl", "python_register_toolchains")
-
-python_register_toolchains(
-    name = "python3_10",
-    # Available versions are listed in @rules_python//python:versions.bzl.
-    # We recommend using the same version your team is already standardized on.
-    python_version = "3.10",
-)
-
-load("@python3_10//:defs.bzl", "interpreter")
-
 # Create a pip repo @diffren_deps that contains Bazel targets for
 # all the third-party packages specified in the requirements.txt file.
+load("@rules_python//python/pip_install:repositories.bzl", "pip_install_dependencies")
+pip_install_dependencies()
+
 load("@rules_python//python:pip.bzl", "pip_install")
+
 pip_install(
-    python_interpreter_target = interpreter,
-    requirements = "//third_party:requirements.txt",
+   name = "diffren_deps",
+   requirements = "//third_party:requirements.txt",
 )
+
+# Import Tensorflow. This version should track the version imported by JAX.
+http_archive(
+    name = "org_tensorflow",
+    sha256 = "9073ab3cbf3a89baee459f6e953cee240864393774f568fdba200a6ff5512c9f",
+    strip_prefix = "tensorflow-a4905aa04186bcaf89b06032baa450cc1ce103ad",
+    urls = [
+        "https://github.com/tensorflow/tensorflow/archive/a4905aa04186bcaf89b06032baa450cc1ce103ad.tar.gz",
+    ],
+)
+
+
+# Initialize TensorFlow's external dependencies.
+load("@org_tensorflow//tensorflow:workspace3.bzl", "tf_workspace3")
+tf_workspace3()
+
+load("@org_tensorflow//tensorflow:workspace2.bzl", "tf_workspace2")
+tf_workspace2()
+
+load("@org_tensorflow//tensorflow:workspace1.bzl", "tf_workspace1")
+tf_workspace1()
+
+load("@org_tensorflow//tensorflow:workspace0.bzl", "tf_workspace0")
+tf_workspace0()
 
 http_archive(
     name = "com_github_gflags_gflags",
@@ -39,38 +56,3 @@ http_archive(
     strip_prefix = "glog-0.6.0",
     urls = ["https://github.com/google/glog/archive/v0.6.0.zip"],
 )
-
-# import xla in the same way that jax does.
-
-http_archive(
-    name = "xla",
-    sha256 = "9f39af4d81d2c8bd52b47f4ef37dfd6642c6950112e4d9d3d95ae19982c46eba",
-    strip_prefix = "xla-0f31407ee498e6dba242d03f8d382ebcfcc61790",
-    urls = [
-        "https://github.com/openxla/xla/archive/0f31407ee498e6dba242d03f8d382ebcfcc61790.tar.gz",
-    ],
-)
-
-load("@xla//:workspace4.bzl", "xla_workspace4")
-xla_workspace4()
-
-load("@xla//:workspace3.bzl", "xla_workspace3")
-xla_workspace3()
-
-load("@xla//:workspace2.bzl", "xla_workspace2")
-xla_workspace2()
-
-load("@xla//:workspace1.bzl", "xla_workspace1")
-xla_workspace1()
-
-load("@xla//:workspace0.bzl", "xla_workspace0")
-xla_workspace0()
-
-local_repository(
-    name = "jax",
-    path = "../jax"
-)
-
-load("@jax//third_party/flatbuffers:workspace.bzl", flatbuffers = "repo")
-flatbuffers()
-

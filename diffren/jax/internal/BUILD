@@ -6,16 +6,14 @@ package(
     default_visibility = ["//:__subpackages__"],
 )
 
-load( "@pip//:requirements.bzl", "requirement",)
-
 py_test(
     name = "framebuffer_test",
     srcs = ["framebuffer_test.py"],
     deps = [
         ":framebuffer",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("jax"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -23,8 +21,8 @@ py_library(
     name = "framebuffer",
     srcs = ["framebuffer.py"],
     deps = [
-        requirement("flax"),
-        requirement("jax"),
+        "@diffren_deps//pypi__flax",
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -33,7 +31,7 @@ py_library(
     srcs = ["interpolate.py"],
     deps = [
         "//diffren/jax/internal:framebuffer",
-        requirement("jax"),
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -47,11 +45,10 @@ py_test(
         "//diffren/common:test_utils",
         "//diffren/jax:constants",
         "//diffren/jax:render",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("etils"),
-        requirement("jax"),
-        requirement("numpy"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
     ],
 )
 
@@ -62,7 +59,7 @@ py_library(
         "//diffren/jax:constants",
         "//diffren/jax/internal:framebuffer",
         "//diffren/jax/internal/kernels:rasterize_triangles_xla",
-        requirement("jax"),
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -75,11 +72,10 @@ py_test(
     deps = [
         ":rasterize",
         "//diffren/common:test_utils",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("etils"),
-        requirement("jax"),
-        requirement("numpy"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
     ],
 )
 
@@ -91,7 +87,7 @@ py_library(
         ":interpolate",
         "//diffren/jax:composite",
         "//diffren/jax/utils:transforms",
-        requirement("jax"),
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -112,12 +108,11 @@ py_test(
         "//diffren/jax/utils:mesh",
         "//diffren/jax/utils:shaders",
         "//diffren/jax/utils:transforms",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("etils"),
-        requirement("jax"),
-        requirement("numpy"),
-        requirement("pillow"),
-        requirement("scikit_image"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
+        "@diffren_deps//pypi__pillow",
+        "@diffren_deps//pypi__scikit_image",
     ],
 )

@@ -4,14 +4,12 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
-load( "@pip//:requirements.bzl", "requirement",)
-
 py_library(
     name = "camera",
     srcs = ["camera.py"],
     deps = [
         "//diffren/jax/utils:transforms",
-        requirement("jax"),
+        "@diffren_deps//pypi__jax",
     ],
 )
 
@@ -24,14 +22,14 @@ py_library(
         "//diffren/jax/internal:interpolate",
         "//diffren/jax/internal:rasterize",
         "//diffren/jax/internal:splat",
-        requirement("jax"),
+        "@diffren_deps//pypi__jax",
     ],
 )
 
 py_library(
     name = "composite",
     srcs = ["composite.py"],
-    deps = [requirement("jax")],
+    deps = ["@diffren_deps//pypi__jax"],
 )
 
 py_library(
@@ -45,11 +43,11 @@ py_test(
     deps = [
         ":camera",
         "//diffren/common:test_utils",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("jax"),
-        requirement("numpy"),
-        requirement("transformations"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
+        "@diffren_deps//pypi__transformations",
     ],
 )
 
@@ -68,9 +66,9 @@ py_test(
         "//diffren/common:test_utils",
         "//diffren/jax/internal:rasterize",
         "//diffren/jax/utils:transforms",
-        requirement("absl_py"),
-        requirement("chex"),
-        requirement("jax"),
-        requirement("numpy"),
+        "@diffren_deps//pypi__absl_py",
+        "@diffren_deps//pypi__chex",
+        "@diffren_deps//pypi__jax",
+        "@diffren_deps//pypi__numpy",
     ],
 )
