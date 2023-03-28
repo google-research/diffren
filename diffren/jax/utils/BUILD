@@ -6,10 +6,12 @@ package(
     default_visibility = ["//:__subpackages__"],
 )
 
+load( "@pip//:requirements.bzl", "requirement",)
+
 py_library(
     name = "transforms",
     srcs = ["transforms.py"],
-    deps = ["@diffren_deps//pypi__jax"],
+    deps = [requirement("jax")],
 )
 
 py_test(
@@ -17,11 +19,11 @@ py_test(
     srcs = ["transforms_test.py"],
     deps = [
         ":transforms",
-        "@diffren_deps//pypi__absl_py",
-        "@diffren_deps//pypi__chex",
-        "@diffren_deps//pypi__jax",
-        "@diffren_deps//pypi__numpy",
-        "@diffren_deps//pypi__transformations",
+        requirement("absl_py"),
+        requirement("chex"),
+        requirement("jax"),
+        requirement("numpy"),
+        requirement("transformations"),
     ],
 )
 
@@ -30,7 +32,7 @@ py_library(
     srcs = ["mesh.py"],
     deps = [
         ":transforms",
-        "@diffren_deps//pypi__jax",
+        requirement("jax"),
     ],
 )
 
@@ -39,10 +41,10 @@ py_library(
     srcs = ["shaders.py"],
     deps = [
         ":transforms",
-        "@diffren_deps//pypi__etils",
-        "@diffren_deps//pypi__jax",
-        "@diffren_deps//pypi__numpy",
-        "@diffren_deps//pypi__pillow",
+        requirement("etils"),
+        requirement("jax"),
+        requirement("numpy"),
+        requirement("pillow"),
     ],
 )
 
@@ -63,10 +65,11 @@ py_test(
         "//diffren/jax:camera",
         "//diffren/jax:constants",
         "//diffren/jax:render",
-        "@diffren_deps//pypi__absl_py",
-        "@diffren_deps//pypi__chex",
-        "@diffren_deps//pypi__jax",
-        "@diffren_deps//pypi__numpy",
+        requirement("absl_py"),
+        requirement("chex"),
+        requirement("etils"),
+        requirement("jax"),
+        requirement("numpy"),
     ],
 )
 
@@ -78,10 +81,11 @@ py_test(
         ":mesh",
         "//diffren/common:obj_loader",
         "//diffren/common:test_utils",
-        "@diffren_deps//pypi__absl_py",
-        "@diffren_deps//pypi__chex",
-        "@diffren_deps//pypi__jax",
-        "@diffren_deps//pypi__numpy",
+        requirement("absl_py"),
+        requirement("chex"),
+        requirement("etils"),
+        requirement("jax"),
+        requirement("numpy"),
     ],
 )
 
@@ -90,8 +94,8 @@ py_library(
     srcs = ["depthmap.py"],
     deps = [
         ":mesh",
-        "@diffren_deps//pypi__einops",
-        "@diffren_deps//pypi__jax",
+        requirement("einops"),
+        requirement("jax"),
     ],
 )
 
@@ -99,8 +103,8 @@ py_test(
     name = "depthmap_test",
     srcs = ["depthmap_test.py"],
     data = [
-        "//third_party/py/diffren/common/test_data:images",
-        "//third_party/py/diffren/common/test_data:meshes",
+        "//diffren/common/test_data:images",
+        "//diffren/common/test_data:meshes",
     ],
     deps = [
         ":depthmap",
@@ -110,9 +114,10 @@ py_test(
         "//diffren/common:test_utils",
         "//diffren/jax:constants",
         "//diffren/jax:render",
-        "@diffren_deps//pypi__absl_py",
-        "@diffren_deps//pypi__chex",
-        "@diffren_deps//pypi__jax",
-        "@diffren_deps//pypi__numpy",
+        requirement("absl_py"),
+        requirement("chex"),
+        requirement("etils"),
+        requirement("jax"),
+        requirement("numpy"),
     ],
 )
