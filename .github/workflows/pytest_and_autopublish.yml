@@ -18,15 +18,14 @@ jobs:
     # Install deps
     - uses: actions/setup-python@v4
       with:
-        python-version: 3.7
+        python-version: '3.10'
     - run: pip --version
     - run: pip install -e .[dev]
     - run: pip freeze
 
-    # TODO(fcole): Tests disabled to allow uploads to succeed for now.
     # Run tests (in parallel)
-    # - name: Run core tests
-    #   run: pytest -vv -n auto
+    - name: Run core tests
+      run: pytest -vv -n auto
 
   # Auto-publish when version is increased
   publish-job:
@@ -49,3 +48,4 @@ jobs:
         pypi-token: ${{ secrets.PYPI_API_TOKEN }}
         gh-token: ${{ secrets.GITHUB_TOKEN }}
         parse-changelog: true
+        pkg-name: 'diffren-jax'
