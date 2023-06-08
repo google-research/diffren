@@ -1,4 +1,4 @@
-# Copyright 2022 The diffren Authors.
+# Copyright 2023 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ from . import rasterize_triangles_cpu
 from . import rasterize_triangles_gpu
 from diffren.jax.internal.kernels import descriptors_pb2
 import jax
-from jax import abstract_arrays
 from jax.interpreters import batching
 import jax.numpy as jnp
 import numpy as np
@@ -150,11 +149,11 @@ def rasterize_triangles_abstract_eval(vertices, triangles, *, image_width,
   assert triangles.shape[1] == 3
   del face_culling_mode
 
-  return (abstract_arrays.ShapedArray((num_layers, image_height, image_width),
-                                      dtype=np.int32),
-          abstract_arrays.ShapedArray((num_layers, image_height, image_width),
-                                      dtype=np.float32),
-          abstract_arrays.ShapedArray(
+  return (jax.core.ShapedArray((num_layers, image_height, image_width),
+                               dtype=np.int32),
+          jax.core.ShapedArray((num_layers, image_height, image_width),
+                               dtype=np.float32),
+          jax.core.ShapedArray(
               (num_layers, image_height, image_width, 3), dtype=np.float32))
 
 
