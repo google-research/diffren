@@ -159,13 +159,13 @@ def rasterize_triangles_abstract_eval(vertices, triangles, *, image_width,
 
 rasterize_triangles_p = jax.core.Primitive('rasterize_triangles')
 rasterize_triangles_p.multiple_results = True
-rasterize_triangles_p.def_impl(
-    functools.partial(jax.xla.apply_primitive, rasterize_triangles_p))
+rasterize_triangles_p.def_impl(functools.partial(
+    jax.interpreters.xla.apply_primitive, rasterize_triangles_p))
 rasterize_triangles_p.def_abstract_eval(rasterize_triangles_abstract_eval)
 
-jax.xla.backend_specific_translations['cpu'][
+jax.interpreters.xla.backend_specific_translations['cpu'][
     rasterize_triangles_p] = _translation_rule_cpu
-jax.xla.backend_specific_translations['gpu'][
+jax.interpreters.xla.backend_specific_translations['gpu'][
     rasterize_triangles_p] = _translation_rule_gpu
 
 
