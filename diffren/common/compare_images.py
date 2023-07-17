@@ -197,8 +197,9 @@ def expect_image_file_and_image_are_near(test,
   baseline_format = ("." + baseline_pil_image.format).lower()
 
   if resize_baseline_image:
-    baseline_pil_image = baseline_pil_image.resize(resize_baseline_image,
-                                                   PilImage.ANTIALIAS)
+    baseline_pil_image = baseline_pil_image.resize(
+        resize_baseline_image, PilImage.Resampling.LANCZOS
+    )
   baseline_image = np.array(baseline_pil_image)
 
   expect_images_are_near_and_save_comparison(test, baseline_image, result_image,

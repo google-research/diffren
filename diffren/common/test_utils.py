@@ -149,7 +149,9 @@ def check_image(
   """Checks the input image against an image file and saves the result."""
   image = compare_images.get_pil_formatted_image(image_tensor, add_transparency)
   if resize_image_to:
-    image = PilImage.fromarray(image).resize(resize_image_to, PilImage.NEAREST)
+    image = PilImage.fromarray(image).resize(
+        resize_image_to, PilImage.Resampling.NEAREST
+    )
     image = np.array(image)
 
   error_threshold = 0 if exact else 0.04
