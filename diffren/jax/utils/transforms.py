@@ -78,7 +78,7 @@ def transform_homogeneous(matrices, vertices):
   return hi_prec_matmul(vertices, matrices)
 
 
-def quaternion_matrix(q: jnp.array):
+def quaternion_matrix(q: jnp.ndarray):
   """Creates a 4x4 rotation matrix from a quaternion.
 
   This function is based on quaternion_matrix() from transformations.py.
