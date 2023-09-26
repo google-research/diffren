@@ -68,7 +68,7 @@ class Framebuffer(object):
 
     try:
       for i in range(1, len(shapes)):
-        if not jnp.array_equal(shapes[0][:-1], shapes[i][:-1]):
+        if not jnp.array_equal(shapes[0][:-1], shapes[i][:-1]):  # pytype: disable=wrong-arg-types  # jnp-type
           raise ValueError(
               f"Expected all input shapes to match (up to channels), "
               f"but found {shapes}")
