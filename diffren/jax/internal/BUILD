@@ -56,9 +56,19 @@ py_test(
 )
 
 py_library(
+  name = "barycentrics",
+  srcs = ["barycentrics.py"],
+  deps = [
+    "//diffren/jax/internal:framebuffer",
+    requirement("jax"),
+  ],
+)
+
+py_library(
     name = "rasterize",
     srcs = ["rasterize.py"],
     deps = [
+        ":barycentrics",
         "//diffren/jax:constants",
         "//diffren/jax/internal:framebuffer",
         "//diffren/jax/internal/kernels:rasterize_triangles_xla",
