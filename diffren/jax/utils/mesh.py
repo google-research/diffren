@@ -129,7 +129,7 @@ def remove_unused_vertices(vertices, attributes, triangles):
       .set(True)
   )
   kept_vertices = vertices[vertex_mask, :]
-  kept_attributes = jax.tree_map(lambda x: x[vertex_mask, :], attributes)
+  kept_attributes = jax.tree.map(lambda x: x[vertex_mask, :], attributes)
 
   vertex_mask_offset = jnp.pad(vertex_mask, ((1, 0)), constant_values=False)
   new_vert_indices = jnp.cumsum(vertex_mask_offset)
