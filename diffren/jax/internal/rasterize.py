@@ -39,10 +39,10 @@ def rasterize_triangles(vertices: jnp.ndarray,
   None of the outputs of this function are differentiable.
 
   Args:
-    vertices: float32 array of xyz positions with shape [vertex_count, d]. If
+    vertices: float array of xyz positions with shape [vertex_count, d]. If
       projection_matrix is specified, d may be 3 or 4. If camera is None, d must
       be 4 and the values are assumed to be xyzw homogenous coordinates.
-    triangles: int32 array with shape [triangle_count, 3].
+    triangles: int array with shape [triangle_count, 3].
     camera: float array with shape [4, 4] containing a model-view-perspective
       projection matrix (later, this will optionally be a camera with distortion
       coefficients). May be None. If None, vertices are assumed to be 4D
@@ -94,9 +94,16 @@ def rasterize_triangles(vertices: jnp.ndarray,
     vertices = jnp.matmul(
         vertices, jnp.transpose(camera), precision=jax.lax.Precision.HIGHEST)
 
-  triangle_id, z_buffer, barycentrics = rasterize_triangles_xla.rasterize_triangles(
-      vertices, triangles, image_width, image_height, num_layers,
-      face_culling_mode)
+  triangle_id, z_buffer, barycentrics = (
+      rasterize_triangles_xla.rasterize_triangles(
+          vertices.astype(jnp.float32),
+          triangles.astype(jnp.int32),
+          image_width,
+          image_height,
+          num_layers,
+          face_culling_mode,
+      )
+  )
 
   mask = (z_buffer != 1.0).astype(jnp.float32)
 

@@ -24,6 +24,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+jax.config.update('jax_enable_x64', True)
+
 
 class RasterizeTest(chex.TestCase, parameterized.TestCase):
 
@@ -46,15 +48,63 @@ class RasterizeTest(chex.TestCase, parameterized.TestCase):
 
   @chex.variants(with_jit=True, without_jit=True)
   @parameterized.named_parameters(
-      ('w constant', [1.0, 1.0, 1.0], 'Simple_Triangle.png', False, False),
-      ('w constant diff barys', [1.0, 1.0, 1.0], 'Simple_Triangle.png', False,
-       True), ('w constant None camera', [1.0, 1.0, 1.0
-                                         ], 'Simple_Triangle.png', True, False),
-      ('w varying', [0.2, 0.5, 2.0], 'Perspective_Corrected_Triangle.png',
-       False, False), ('w varying diff barys', [0.2, 0.5, 2.0],
-                       'Perspective_Corrected_Triangle.png', False, True))
-  def test_render_simple_triangle(self, w_vector, target_image_name,
-                                  use_none_camera, use_diff_barys):
+      (
+          'w constant',
+          [1.0, 1.0, 1.0],
+          'Simple_Triangle.png',
+          False,
+          False,
+          jnp.float32,
+      ),
+      (
+          'w constant float64',
+          [1.0, 1.0, 1.0],
+          'Simple_Triangle.png',
+          False,
+          False,
+          jnp.float64,
+      ),
+      (
+          'w constant diff barys',
+          [1.0, 1.0, 1.0],
+          'Simple_Triangle.png',
+          False,
+          True,
+          jnp.float32,
+      ),
+      (
+          'w constant None camera',
+          [1.0, 1.0, 1.0],
+          'Simple_Triangle.png',
+          True,
+          False,
+          jnp.float32,
+      ),
+      (
+          'w varying',
+          [0.2, 0.5, 2.0],
+          'Perspective_Corrected_Triangle.png',
+          False,
+          False,
+          jnp.float32,
+      ),
+      (
+          'w varying diff barys',
+          [0.2, 0.5, 2.0],
+          'Perspective_Corrected_Triangle.png',
+          False,
+          True,
+          jnp.float32,
+      ),
+  )
+  def test_render_simple_triangle(
+      self,
+      w_vector,
+      target_image_name,
+      use_none_camera,
+      use_diff_barys,
+      dtype,
+  ):
     """Directly renders a rasterized triangle's barycentric coordinates.
 
     Tests the wrapping code as well as the kernel.
@@ -65,12 +115,15 @@ class RasterizeTest(chex.TestCase, parameterized.TestCase):
       use_none_camera: pass in None as the camera transform, or the identity
         matrix
       use_diff_barys: compute and test differentiable barycentric coordinates.
+      dtype: the dtype to use for the vertex coordinates.
     """
     clip_coordinates = jnp.array(
         [[-0.5, -0.5, 0.8, 1.0], [0.0, 0.5, 0.3, 1.0], [0.5, -0.5, 0.3, 1.0]],
-        dtype=jnp.float32)
+        dtype=dtype,
+    )
     clip_coordinates = clip_coordinates * jnp.reshape(
-        jnp.array(w_vector, dtype=jnp.float32), [3, 1])
+        jnp.array(w_vector, dtype=dtype), [3, 1]
+    )
     camera = None if use_none_camera else jnp.eye(4)
 
     @self.variant
