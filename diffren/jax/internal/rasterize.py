@@ -36,7 +36,8 @@ def rasterize_triangles(vertices: jnp.ndarray,
   If num_layers > 1, the layers are returned in front-to-back order (layer 0 is
   closest to the camera).
 
-  None of the outputs of this function are differentiable.
+  None of the outputs of this function are differentiable unless
+  compute_diff_barys is True.
 
   Args:
     vertices: float array of xyz positions with shape [vertex_count, d]. If
