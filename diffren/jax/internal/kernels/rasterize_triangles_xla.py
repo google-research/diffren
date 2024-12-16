@@ -20,6 +20,7 @@ from . import rasterize_triangles_cpu
 from . import rasterize_triangles_gpu
 from diffren.jax.internal.kernels import descriptors_pb2
 import jax
+import jax.extend as jex
 from jax.interpreters import batching
 from jax.interpreters import mlir
 import jax.numpy as jnp
@@ -129,7 +130,7 @@ def rasterize_triangles_abstract_eval(vertices, triangles, *, image_width,
               (num_layers, image_height, image_width, 3), dtype=np.float32))
 
 
-rasterize_triangles_p = jax.core.Primitive('rasterize_triangles')
+rasterize_triangles_p = jex.core.Primitive('rasterize_triangles')
 rasterize_triangles_p.multiple_results = True
 rasterize_triangles_p.def_impl(functools.partial(
     jax.interpreters.xla.apply_primitive, rasterize_triangles_p))
