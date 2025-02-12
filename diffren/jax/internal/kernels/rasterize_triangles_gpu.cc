@@ -12,19 +12,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.*/
 
-#include <algorithm>
-#include <cstdint>
-#include <vector>
+#include <string>
 
 #include "diffren/common/kernels/rasterize_triangles_impl_cuda.cu.h"
+#include "diffren/common/kernels/rasterize_triangles_types.h"
 
 #include "absl/base/casts.h"
-#include "absl/status/status.h"
-#include "diffren/jax/internal/kernels/descriptors.pb.h"
 #include "include/pybind11/pybind11.h"
-#include "xla/service/custom_call_status.h"
+#include "xla/ffi/api/ffi.h"
 
 namespace py = pybind11;
+namespace ffi = xla::ffi;
+
+XLA_FFI_REGISTER_ENUM_ATTR_DECODING(diffren::FaceCullingMode);
 
 namespace diffren {
 namespace cuda {
@@ -34,57 +34,52 @@ namespace cuda {
 //
 // Inputs:
 // vertices (0): float array with 4*vertex_count elements.
-// vertex_count (1): integer, number of vertices (currently unused).
-// triangles (2): integer array of 3*triangle_count elements.
-// triangle_count (3): integer, number of triangles.
-// image_width (4): integer, width of output image.
-// image_height (5): integer, height of output image.
-// num_layers (6): integer, number of layers to render.
-// face_culling_mode (7): integer, see rasterize_triangles_impl.h.
+// triangles (1): integer array of 3*triangle_count elements.
+// face_culling_mode (2): integer, see rasterize_triangles_impl.h.
 //
 // Outputs:
 // triangle_ids (0): integer array of size num_layers*image_height*image_width.
 // z_buffer (1): float array of size num_layers*image_height*image_width.
 // barycentric_coordinates (2): float array of size n*h*w*3.
-
-void rasterize_triangles(cudaStream_t stream, void** buffers,
-                         const char* opaque, std::size_t opaque_len,
-                         XlaCustomCallStatus* status) {
-  RasterizeTrianglesConfig descriptor;
-  auto did_parse = descriptor.ParseFromString(std::string(opaque, opaque_len));
-  if (!did_parse) {
-    const char message[] = "RasterizeTrianglesConfig parsing failed.";
-    XlaCustomCallStatusSetFailure(status, message, strlen(message));
-    return;
-  }
-
-  int triangle_count = descriptor.triangle_count();
-  int image_width = descriptor.image_width();
-  int image_height = descriptor.image_height();
-  int num_layers = descriptor.num_layers();
-  auto face_culling_mode =
-      static_cast<diffren::FaceCullingMode>(descriptor.face_culling_mode());
-
-  const float* vertices = reinterpret_cast<const float*>(buffers[0]);
-  const int* triangles = reinterpret_cast<const int*>(buffers[1]);
-  int* triangle_ids = reinterpret_cast<int*>(buffers[2]);
-  float* z_buffer = reinterpret_cast<float*>(buffers[3]);
-  float* barycentric_coordinates = reinterpret_cast<float*>(buffers[4]);
+ffi::Error rasterize_triangles_impl(
+    cudaStream_t stream, diffren::FaceCullingMode face_culling_mode,
+    ffi::BufferR2<ffi::F32> vertices, ffi::BufferR2<ffi::S32> triangles,
+    ffi::ResultBufferR3<ffi::S32> triangle_ids,
+    ffi::ResultBufferR3<ffi::F32> z_buffer,
+    ffi::ResultBufferR4<ffi::F32> barycentric_coordinates) {
+  int triangle_count = static_cast<int>(triangles.dimensions()[0]);
+  auto out_dims = triangle_ids->dimensions();
+  int num_layers = static_cast<int>(out_dims[0]);
+  int image_height = static_cast<int>(out_dims[1]);
+  int image_width = static_cast<int>(out_dims[2]);
 
   auto impl_status = RasterizeTrianglesImpl(
-      vertices, triangles, triangle_count, image_width, image_height,
-      num_layers, face_culling_mode, triangle_ids, z_buffer,
-      barycentric_coordinates, stream);
+      vertices.typed_data(), triangles.typed_data(), triangle_count,
+      image_width, image_height, num_layers, face_culling_mode,
+      triangle_ids->typed_data(), z_buffer->typed_data(),
+      barycentric_coordinates->typed_data(), stream);
   if (!impl_status.ok()) {
-    XlaCustomCallStatusSetFailure(status, impl_status.message().data(),
-                                  impl_status.message().size());
+    return ffi::Error(static_cast<ffi::ErrorCode>(impl_status.code()),
+                      std::string(impl_status.message()));
   }
+  return ffi::Error::Success();
 }
+
+XLA_FFI_DEFINE_HANDLER_SYMBOL(
+    rasterize_triangles, rasterize_triangles_impl,
+    ffi::Ffi::Bind()
+        .Ctx<ffi::PlatformStream<cudaStream_t>>()
+        .Attr<diffren::FaceCullingMode>("face_culling_mode")
+        .Arg<ffi::BufferR2<ffi::F32>>()
+        .Arg<ffi::BufferR2<ffi::S32>>()
+        .Ret<ffi::BufferR3<ffi::S32>>()
+        .Ret<ffi::BufferR3<ffi::F32>>()
+        .Ret<ffi::BufferR4<ffi::F32>>());
 
 py::dict Registrations() {
   pybind11::dict dict;
   dict["rasterize_triangles"] = pybind11::capsule(
-      absl::bit_cast<void *>(&rasterize_triangles), "xla._CUSTOM_CALL_TARGET");
+      absl::bit_cast<void*>(&rasterize_triangles), "xla._CUSTOM_CALL_TARGET");
   return dict;
 }
 

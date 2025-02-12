@@ -2,27 +2,11 @@ load(
     "@jax//jaxlib:jax.bzl",
     "pybind_extension",
 )
-load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@pip//:requirements.bzl", "requirement")
 
 licenses(["notice"])
 
 package(default_visibility = ["//:__subpackages__"])
-
-proto_library(
-    name = "descriptors_proto",
-    srcs = ["descriptors.proto"],
-)
-
-py_proto_library(
-    name = "descriptors_py_pb2",
-    srcs = ["descriptors.proto"],
-)
-
-cc_proto_library(  # buildifier: disable=native-cc-proto
-    name = "descriptors_cc_proto",
-    deps = [":descriptors_proto"],
-)
 
 pybind_extension(
     name = "rasterize_triangles_gpu",
@@ -36,12 +20,12 @@ pybind_extension(
     features = ["-use_header_modules"],
     module_name = "rasterize_triangles_gpu",
     deps = [
-        ":descriptors_cc_proto",
         "//diffren/common/kernels:rasterize_triangles_impl_cuda",
-        "@com_google_absl//absl/status",
+        "//diffren/common/kernels:rasterize_triangles_types",
+        "@com_google_absl//absl/base",
         "@local_config_cuda//cuda:cuda_headers",
         "@pybind11",
-        "@xla//xla/service:custom_call_status",
+        "@xla//xla/ffi/api:ffi",
         "@xla//xla/stream_executor/cuda:cudart_stub",
     ],
 )
@@ -57,9 +41,10 @@ pybind_extension(
     module_name = "rasterize_triangles_cpu",
     deps = [
         "//diffren/common/kernels:rasterize_triangles_impl",
-        "@com_google_absl//absl/types:span",
+        "//diffren/common/kernels:rasterize_triangles_types",
+        "@com_google_absl//absl/base",
         "@pybind11",
-        "@xla//xla/service:custom_call_status",
+        "@xla//xla/ffi/api:ffi",
     ],
 )
 
