@@ -96,7 +96,8 @@ def create_mesh_from_positions(
   """
   w, h = (xyz_map.shape[1], xyz_map.shape[0])
   xyz_map = jnp.array(xyz_map)
-  quad_mask = jnp.array(quad_mask).astype(bool)
+  if quad_mask is not None:
+    quad_mask = jnp.array(quad_mask).astype(bool)
 
   verts = einops.rearrange(xyz_map, 'h w c -> (h w) c')
 
