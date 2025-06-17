@@ -10,5 +10,5 @@ scikit-image
 transformations
 etils
 einops
-protobuf<4
+protobuf<5
 importlib-resources
