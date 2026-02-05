@@ -25,7 +25,7 @@ dependencies = [
     "transformations",
     "etils",
     "einops",
-    "protobuf<4"  # Necessary to avoid "TypeError: Descriptors cannot not be created directly"
+    "protobuf<6"  # Necessary to avoid "TypeError: Descriptors cannot not be created directly"
 ]
 
 # This is set automatically by flit using `diffren.__version__`
