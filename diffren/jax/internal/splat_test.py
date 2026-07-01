@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
 
     composite, _, normalized_layers = render.render_triangles(  # pytype: disable=wrong-arg-types  # jax-ndarray
         vertices, {'colors': colors},
-        triangles,
-        None,
+        triangles,  # pyrefly: ignore[bad-argument-type]
+        None,  # pyrefly: ignore[bad-argument-type]
         image_width,
         image_height,
         lambda x: x['colors'],
@@ -118,7 +118,7 @@ class SplatTest(chex.TestCase, parameterized.TestCase):
         return render.render_triangles(  # pytype: disable=wrong-arg-types  # jax-ndarray
             vertices_slice, {'colors': attributes_slice},
             triangles,
-            None,
+            None,  # pyrefly: ignore[bad-argument-type]
             image_width,
             image_height,
             lambda x: x['colors'],
