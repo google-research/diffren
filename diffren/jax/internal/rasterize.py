@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -162,7 +162,7 @@ def differentiable_barycentrics(framebuffer: fb.Framebuffer,
   # Mask out barycentrics for background pixels.
   barycentric_coords = barycentric_coords * framebuffer.foreground_mask
 
-  return framebuffer.replace(barycentrics=barycentric_coords)
+  return framebuffer.replace(barycentrics=barycentric_coords)  # pyrefly: ignore[missing-attribute]
 
 
 def normalized_pixel_coordinates(image_width, image_height):

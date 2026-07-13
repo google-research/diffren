@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ class RenderTest(chex.TestCase, parameterized.TestCase):
           face_culling_mode=constants.FaceCullingMode.NONE,
           compositing_mode=constants.CompositingMode.OVER)
 
-    rendered = jax.vmap(render_for_vmap, in_axes)(vertices, attributes,
-                                                  triangles, self.projection)
+    rendered = jax.vmap(render_for_vmap, in_axes)(vertices, attributes,  # pyrefly: ignore[unbound-name]
+                                                  triangles, self.projection)  # pyrefly: ignore[unbound-name]
 
     for i in (0, 1):
       test_utils.check_image(self, np.array(rendered[i, :, :, :]),

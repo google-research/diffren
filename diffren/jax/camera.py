@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ def perspective(aspect_ratio: float, fov_y: float, near_clip: float,
   # and adds the half-angle factor of .5.
   focal_length_y = 1.0 / jnp.tan(fov_y * (math.pi / 360.0))
   return perspective_from_intrinsics(focal_length_y / aspect_ratio,  # pytype: disable=wrong-arg-types  # jax-types
-                                     focal_length_y, 0.0, 0.0, near_clip,
+                                     focal_length_y, 0.0, 0.0, near_clip,  # pyrefly: ignore[bad-argument-type]
                                      far_clip, 2, 2)
 
 

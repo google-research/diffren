@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,13 +92,13 @@ def load_and_flatten_obj(obj_path):
       flat_triangles.append(triangle)
 
   # Keep only vertex types that are used in at least one vertex.
-  flat_vertices_array = np.float32(flat_vertices_list)
-  flat_vertices = flat_vertices_array[:, :3]
+  flat_vertices_array = np.float32(flat_vertices_list)  # pyrefly: ignore[bad-argument-type]
+  flat_vertices = flat_vertices_array[:, :3]  # pyrefly: ignore[bad-index]
   if has_type['vt']:
-    flat_vertices = np.concatenate((flat_vertices, flat_vertices_array[:, 3:5]),
+    flat_vertices = np.concatenate((flat_vertices, flat_vertices_array[:, 3:5]),  # pyrefly: ignore[bad-index]
                                    axis=-1)
   if has_type['vn']:
-    flat_vertices = np.concatenate((flat_vertices, flat_vertices_array[:, -3:]),
+    flat_vertices = np.concatenate((flat_vertices, flat_vertices_array[:, -3:]),  # pyrefly: ignore[bad-index]
                                    axis=-1)
 
-  return flat_vertices, np.int32(flat_triangles)
+  return flat_vertices, np.int32(flat_triangles)  # pyrefly: ignore[bad-argument-type]

@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ class Framebuffer(object):
       return self
 
     return Framebuffer(
-        triangle_id=self.triangle_id[:, index, ...]
+        triangle_id=self.triangle_id[:, index, ...]  # pyrefly: ignore[bad-argument-type]
         if self.triangle_id is not None else None,
         vertex_ids=self.vertex_ids[:, index, ...],
         foreground_mask=self.foreground_mask[:, index, ...],

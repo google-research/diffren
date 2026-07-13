@@ -1,4 +1,4 @@
-# Copyright 2024 The diffren Authors.
+# Copyright 2026 The diffren Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ def eye_position(view_name):
   elif view_name.startswith('spot'):
     eye = np.array((0.2, 0.3, -0.5))
     world_up = np.array((0.0, -1.0, 0.0))
-  return eye, world_up
+  return eye, world_up  # pyrefly: ignore[unbound-name]
 
 
 def make_look_at_matrix(view_name):
