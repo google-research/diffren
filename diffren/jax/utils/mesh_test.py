@@ -122,5 +122,75 @@ class MeshTest(chex.TestCase, parameterized.TestCase):
     np.testing.assert_array_equal(t, expected_triangles)
 
 
+class ScatterPointsRandomnessTest(parameterized.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    # Disjoint right triangles have areas 1/2 and 2, respectively.
+    self.vertices = jnp.array([
+        [0., 0., 0.],
+        [1., 0., 0.],
+        [0., 1., 0.],
+        [10., 0., 0.],
+        [12., 0., 0.],
+        [10., 2., 0.],
+    ])
+    self.triangles = jnp.array([[0, 1, 2], [3, 4, 5]])
+    self.attributes = {
+        'position': self.vertices,
+        'height': self.vertices[:, 1:2]
+    }
+
+  @parameterized.product(num_points=(1, 32), jit=(False, True))
+  def test_each_random_key_is_consumed_once(self, num_points, jit):
+
+    def sample(key):
+      return mesh.scatter_points(self.vertices,
+                                 self.attributes,
+                                 self.triangles,
+                                 num_points,
+                                 rng=key)
+
+    with jax.debug_key_reuse(True):
+      fn = jax.jit(sample) if jit else sample
+      points, attributes = fn(jax.random.key(7))
+      self.assertEqual(points.shape, (num_points, 3))
+      np.testing.assert_allclose(attributes['position'], points, atol=1e-6)
+      np.testing.assert_allclose(attributes['height'],
+                                 points[:, 1:2],
+                                 atol=1e-6)
+
+  @parameterized.parameters(False, True)
+  def test_area_weighting_and_conditional_uniformity(self, jit):
+
+    def sample(key):
+      return mesh.scatter_points(self.vertices,
+                                 self.attributes,
+                                 self.triangles,
+                                 20000,
+                                 rng=key)
+
+    fn = jax.jit(sample) if jit else sample
+    points, attributes = fn(jax.random.PRNGKey(13))
+    points = np.asarray(points)
+    large = points[:, 0] > 5
+    np.testing.assert_allclose(large.mean(), .8, atol=.015)
+    for selected, origin, side in ((~large, 0., 1.), (large, 10., 2.)):
+      local = (points[selected, :2] - [origin, 0.]) / side
+      self.assertTrue(np.all(local >= -1e-6))
+      self.assertTrue(np.all(local.sum(axis=-1) <= 1. + 1e-6))
+      np.testing.assert_allclose(local.mean(axis=0), [1. / 3, 1. / 3], atol=.02)
+    np.testing.assert_allclose(attributes['position'], points, atol=1e-6)
+    np.testing.assert_allclose(attributes['height'], points[:, 1:2], atol=1e-6)
+
+  def test_default_seed_is_reproducible(self):
+    args = (self.vertices, self.attributes, self.triangles, 20)
+    first, first_attrs = mesh.scatter_points(*args)
+    second, second_attrs = mesh.scatter_points(*args)
+    np.testing.assert_array_equal(first, second)
+    for name in first_attrs:
+      np.testing.assert_array_equal(first_attrs[name], second_attrs[name])
+
+
 if __name__ == '__main__':
   absltest.main()
