@@ -68,7 +68,7 @@ class Framebuffer(object):
 
     try:
       for i in range(1, len(shapes)):
-        if not jnp.array_equal(shapes[0][:-1], shapes[i][:-1]):  # pytype: disable=wrong-arg-types  # jnp-type
+        if not jnp.array_equal(shapes[0][:-1], shapes[i][:-1]):  # pyrefly: ignore[bad-argument-type]
           raise ValueError(
               f"Expected all input shapes to match (up to channels), "
               f"but found {shapes}")
@@ -77,11 +77,11 @@ class Framebuffer(object):
 
   @property
   def is_batched(self):
-    return self.barycentrics.shape.ndim == 5  # pytype: disable=attribute-error  # jax-ndarray
+    return self.barycentrics.shape.ndim == 5  # pyrefly: ignore[missing-attribute]
 
   @property
   def is_multi_layer(self):
-    return self.barycentrics.shape.ndim in [4, 5]  # pytype: disable=attribute-error  # jax-ndarray
+    return self.barycentrics.shape.ndim in [4, 5]  # pyrefly: ignore[missing-attribute]
 
   @property
   def batch_size(self):
@@ -125,5 +125,5 @@ class Framebuffer(object):
         if self.triangle_id is not None else None,
         vertex_ids=self.vertex_ids[:, index, ...],
         foreground_mask=self.foreground_mask[:, index, ...],
-        attributes={k: v.layer(index) for k, v in self.attributes.items()},  # pytype: disable=attribute-error  # jax-ndarray
-        barycentrics=self.barycentrics.layer(index))  # pytype: disable=attribute-error  # jax-ndarray
+        attributes={k: v.layer(index) for k, v in self.attributes.items()},  # pyrefly: ignore[missing-attribute]
+        barycentrics=self.barycentrics.layer(index))  # pyrefly: ignore[missing-attribute]
