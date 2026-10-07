@@ -82,13 +82,16 @@ def scatter_points(vertices, attributes, triangles, num_points, rng=None):
   face_areas = jnp.linalg.norm(jnp.cross(edge_ab, edge_ac), axis=1)
   face_pdf = face_areas / jnp.sum(face_areas)
 
+  # Face selection and barycentric coordinates need independent randomness.
+  face_rng, barycentric_rng = jax.random.split(rng)
+
   # Sample num_points face indices proportionally to the face areas.
   random_faces = jax.random.choice(
-      rng, triangles.shape[0], shape=(num_points,), p=face_pdf
+      face_rng, triangles.shape[0], shape=(num_points,), p=face_pdf
   )
 
   # Pick two random barycentric coordinates in [0.0, 1.0).
-  random_barys = jax.random.uniform(rng, (num_points, 2))
+  random_barys = jax.random.uniform(barycentric_rng, (num_points, 2))
 
   # Uniformly sampling two barycentric coordinates puts half the samples outside
   # the triangle. To put those samples back in the triangle, we flip both
