@@ -32,6 +32,7 @@ def load_and_flatten_obj(obj_path):
   triangles.
 
   This function processes only 'v', 'vt', 'vn', and 'f' .obj lines.
+  Both positive absolute and negative relative vertex indices are supported.
 
   Args:
     obj_path: the path to the Wavefront .obj file.
@@ -68,18 +69,30 @@ def load_and_flatten_obj(obj_path):
         # The vertex name is one of the form: 'v', 'v/vt', 'v//vn', or
         # 'v/vt/vn'.
         vertex_name = tokens[i + 1]
-        if vertex_name in flat_vertices_indices:
-          triangle.append(flat_vertices_indices[vertex_name])
-          continue
-        # Extract all vertex type indices ('' for unspecified).
+        # Resolve relative indices before deduplication: the same negative
+        # index can refer to different vertices as more records are read.
         vertex_indices = vertex_name.split('/')
         while len(vertex_indices) < 3:
           vertex_indices.append('')
-        flat_vertex = []
+        resolved_indices = []
         for vertex_type, index in zip(VERTEX_TYPES, vertex_indices):
-          if index:
-            # obj triangle indices are 1 indexed, so subtract 1 here.
-            flat_vertex += vertex_lists[vertex_type][int(index) - 1]
+          if not index:
+            resolved_indices.append(None)
+            continue
+          count = len(vertex_lists[vertex_type])
+          value = int(index)
+          resolved = value - 1 if value > 0 else count + value
+          if not 0 <= resolved < count:
+            raise ValueError(f'Invalid {vertex_type} index {index} in face')
+          resolved_indices.append(resolved)
+        vertex_key = tuple(resolved_indices)
+        if vertex_key in flat_vertices_indices:
+          triangle.append(flat_vertices_indices[vertex_key])
+          continue
+        flat_vertex = []
+        for vertex_type, index in zip(VERTEX_TYPES, resolved_indices):
+          if index is not None:
+            flat_vertex += vertex_lists[vertex_type][index]
             has_type[vertex_type] = True
           else:
             # Append zeros for missing attributes.
@@ -87,7 +100,7 @@ def load_and_flatten_obj(obj_path):
         flat_vertex_index = len(flat_vertices_list)
 
         flat_vertices_list.append(flat_vertex)
-        flat_vertices_indices[vertex_name] = flat_vertex_index
+        flat_vertices_indices[vertex_key] = flat_vertex_index
         triangle.append(flat_vertex_index)
       flat_triangles.append(triangle)
 
