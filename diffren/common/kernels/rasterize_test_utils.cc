@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "third_party/gloop/util/gtl/value_or_die.h"
 #include "third_party/lodepng/lodepng.h"
 
 #include "glog/logging.h"
